@@ -18,7 +18,14 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 
 #print(X_train[:,0])
 
+colours = ['red','blue']
+colours_train = [colours[i] for i in y_train]
+colours_test = [colours[i] for i in y_test]
+
+fig, (ax1,ax2) = plt.subplots(2)
+
+ax1.scatter(X_train[:,0], X_train[:,1],c=colours_train)
 
 
-plt.plot(X_train[:,0], X_train[:,1],c=y_train[:])
-plt.show()
+ax1.scatter(X_test[:,0], X_test[:,1], c=colours_test)
+plt.show
