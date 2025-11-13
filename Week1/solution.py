@@ -64,7 +64,9 @@ def plot_decision_boundary(clf, X, y, title):
     plt.title(title) 
     plt.xlabel("Feature 1") 
     plt.ylabel("Feature 2") 
-    plt.show()
+    #plt.show()
+
+    
 
 
 # perceptron use
@@ -72,3 +74,4 @@ plot_decision_boundary(P1, X_train, y_train, "Perceptron")
 
 # mlp use
 plot_decision_boundary(MLP1, X_train, y_train, "MLP")
+print(MLP1.coefs_)

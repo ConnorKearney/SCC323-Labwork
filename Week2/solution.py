@@ -60,5 +60,4 @@ def MSE(predicted, actual):
 pred = P1.predict(X_test)
 print(MSE(pred,y_test))
 
-for i in range(len(pred)):
-    print(pred[i], " ", y_test[i])
+
