@@ -1,17 +1,23 @@
 import numpy as np
 
 class ReLU_func:
-    def __call__(self, x):
-        if x > 0: return x
-        return 0
-    
-    def d(self, x):
-        if x > 0: return 1
-        return 0
+    def _call_scalar(self,x):
+            if x > 0: return x
+            return 0
+        
+    def _d_scalar(self,x):
+            if x > 0: return 1
+            return 0    
+        
+    def __call__(self,x):
+        return np.vectorize(self._call_scalar)(x)
+        
+    def d(self,x):
+        return np.vectorize(self._d_scalar)(x)
 
 class Sigmoid_func:
     def __call__(self, x):
-        return (np.e**x)/(np.e**x + 1)
+        return (np.exp(x))/(np.exp(x) + 1)
     
     def d(self, x):
         value = self(x)
@@ -19,8 +25,8 @@ class Sigmoid_func:
     
 class tanh_func:
     def __call__(self, x):
-        numerator = (np.e**x - np.e**-x)
-        denominator = (np.e**x + np.e**-x)
+        numerator = (np.exp(x) - np.exp(-x))
+        denominator = (np.exp(x) + np.exp(-x))
     
         return numerator/denominator
     
@@ -56,6 +62,7 @@ def d_SiLU(x):
 
 
 ReLU = ReLU_func()
+
 Sigmoid = Sigmoid_func()
 tanh = tanh_func()
 
@@ -71,3 +78,6 @@ if __name__ == "__main__":
     print(LeReLU(value))
     print(Para_Sigmoid(value, param))
     print(softsign(value))
+
+
+    

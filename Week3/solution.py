@@ -10,7 +10,6 @@ import random
 
 class MLP:
     def __init__(self, n_features = 2, n_nodes=3, n_classes=2, lr=0.1, max_iter=1000):
-        random.seed(2005)
         self.n_features = n_features
         self.n_nodes = n_nodes
         if n_classes > 2:
@@ -23,9 +22,11 @@ class MLP:
         self.max_iter = max_iter
 
         random_values = [random.random() for _ in range(1000)]
-        self.weights_1 = np.array(random_values[:n_features*n_nodes]).reshape((n_features, n_nodes))
-        self.weights_2 = np.array(random_values[n_features*n_nodes:n_features*n_nodes + n_nodes*self.n_outputs]).reshape((n_nodes, self.n_outputs))
+        self.weights_1 = np.random.randn(self.n_features, self.n_nodes) * 0.1
+        self.weights_2 = W2 = np.random.randn(self.n_nodes, self.n_outputs) * 0.1
         
+        self.b1 = np.zeros((1, self.n_nodes))
+        self.b2 = np.zeros((1, self.n_outputs))
 
         print(self.weights_1.shape)
         print(self.weights_2.shape)
@@ -41,39 +42,65 @@ class MLP:
             self.nextEpoch(X, y)
 
     def nextEpoch(self, X, y):
-        for i in range(1):
-            # forward pass
-            inputs = X[i]
-            internal_values = np.dot(inputs,self.weights_1)
-            #print(internal_values)
-            internal_values_activated = np.array(list(map(self.internalActivationFunction,internal_values)))
-            ##print(internal_values_activated)
-            outputs = np.array(list(map(self.outputActivationFunction,np.dot(internal_values_activated,self.weights_2))))
-            #print(outputs)
+        for i in range(len(X)):
+            ## forward pass
+            inputs = X[i].reshape(1,2)
+            # hidden layer
 
-            error = y[i] - outputs
-            #print(error)
+            hidden_u_values_1 = np.dot(inputs,self.weights_1) + self.b1
+            hidden_a_values_1 = self.internalActivationFunction(hidden_u_values_1)
 
-            # back propogate
-            delta_1 = error * self.outputActivationFunction.d(np.sum(np.dot(internal_values_activated,self.weights_2)))
-            #print(delta_1)
-            self.weights_2 = self.weights_2 + self.lr * delta_1 * internal_values_activated
-            #print(self.weights_2)
-            delta_2 = delta_1 * self.weights_2 * np.array(list(map(self.internalActivationFunction.d, np.cross(inputs, self.weights_1))))
-            print(delta_2.shape)
-            self.weights_1 = self.weights_1 + self.lr * delta_2 * inputs
+            # output layer
 
+            output_u_values = np.dot(hidden_a_values_1,self.weights_2)  + self.b2
+            outputs = self.outputActivationFunction(output_u_values)
+
+            # error
+            error = (outputs - y[i])
+            
+            ## back propogate
+            # output layer delta
+            d_output = error * self.outputActivationFunction.d(outputs)
+            d_weights_2 = np.dot(hidden_a_values_1.T, d_output)
+            d_b2 = np.sum(d_output, axis=0,keepdims=True)
+
+            # hidden layer delta
+            d_hidden_1 = np.dot(d_output, self.weights_2.T)
+            d_u_hidden_1 = d_hidden_1 * self.internalActivationFunction.d(hidden_u_values_1)
+            d_weights_1 = np.dot(inputs.T,d_u_hidden_1)
+            d_b1 = np.sum(d_u_hidden_1,axis=0, keepdims=True)
+
+            #update weights
+            self.weights_2 -= self.lr * d_weights_2
+            self.b2 -= self.lr * d_b2
+            self.weights_1 -= self.lr * d_weights_1
+            self.b1 -= self.lr * d_b1
         
     
-    def predict(self):
+    def predict(self, X):
         pass
+        
 
 
-X, y = make_classification(n_features=2, n_informative=2, n_redundant=0, n_classes=2,random_state=2005)
+    def predict_single(self, x):
+        U1 = np.dot(x, self.weights_1) + self.b1
+        A1 = self.internalActivationFunction(U1)
+        U2 = np.dot(A1, self.weights_2) + self.b2
+        return self.outputActivationFunction(U2)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
 
-MLP1 = MLP(max_iter=1)
+#X, y = make_classification(n_features=2, n_informative=2, n_redundant=0, n_classes=2,random_state=2005)
+
+#X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+
+# 1 Import some data - XOR problem
+X_train = np.array([[0,0],[1,0],[0,1],[1,1]])
+y_train = np.array([[0],[1],[1],[0]])
+X_test = X_train
+y_test = y_train
+
+MLP1 = MLP(max_iter=10000)
 MLP1.fit(X_train, y_train)
-#print(MLP1.weights_1)
-#print(MLP1.weights_2)
+
+print(MLP1.predict_single(X_train))
+print()
